@@ -11,6 +11,18 @@ import random
 import time
 import requests
 
+# Try loading environment variables from .env file manually
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+if os.path.exists(env_path):
+    print("Loading environment variables from .env...")
+    with open(env_path, 'r') as env_file:
+        for line in env_file:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                parts = line.split('=', 1)
+                if len(parts) == 2:
+                    os.environ[parts[0].strip()] = parts[1].strip().strip('"').strip("'")
+
 app = Flask(__name__, static_url_path='', static_folder='.')
 
 # OTP Storage Schema: { email: { "otp": "123456", "expires": timestamp } }
@@ -19,7 +31,7 @@ otp_store = {}
 # SMTP Configuration
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 465
-SMTP_PASSKEY = "mkau nktl usqs puwb"
+SMTP_PASSKEY = os.environ.get("SMTP_PASSKEY", "mkau nktl usqs puwb")
 
 # Load model and encoder
 MODEL_PATH = os.path.join(os.path.dirname(__file__), 'model.pkl')
