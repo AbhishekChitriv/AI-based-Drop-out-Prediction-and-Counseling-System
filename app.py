@@ -535,8 +535,10 @@ else:
                 if risk >= 70:
                     badge_html = "<span class='badge-critical'>CRITICAL RISK</span>"
                     rec_text = "High risk cohort flagged. Recommend dispatching immediate personal counseling invites and academic tutoring support."
+                    risk_color = "#EF4444"
                 elif risk >= 30:
                     badge_html = "<span class='badge-medium'>MEDIUM RISK</span>"
+                    risk_color = "#F59E0B"
                     if res["Attendance_Rate"] < 75:
                         rec_text = "Attendance deficit detected. Schedule an informal review session to identify complications."
                     elif res["GPA"] < 2.5:
@@ -545,6 +547,7 @@ else:
                         rec_text = "Elevated risk signals. Suggest coordinating counseling outreach modules and periodic mentoring reviews."
                 else:
                     badge_html = "<span class='badge-low'>LOW RISK</span>"
+                    risk_color = "#A3E635"
                     rec_text = "Student is currently stable. Maintain standard academic observation."
                     if res["Stress_Index"] > 7:
                         rec_text = "Student is academically sound but reports high stress levels. Advise mental wellness resources."
@@ -555,13 +558,13 @@ else:
                         <p style='font-size: 11px; color: #9CA3AF; margin-top: 4px; margin-bottom: 20px;'>Level: {res['Education_Level']}</p>
                         
                         <div style='text-align: center; margin: 20px 0;'>
-                            <h2 style='font-size: 40px; font-weight: 800; color: #A3E635; margin: 0;'>{risk}%</h2>
+                            <h2 style='font-size: 40px; font-weight: 800; color: {risk_color}; margin: 0;'>{risk}%</h2>
                             <p style='font-size: 10px; color: #9CA3AF; text-transform: uppercase;'>Dropout Risk Probability</p>
                             <div style='margin-top: 10px;'>{badge_html}</div>
                         </div>
                         
-                        <div style='background-color: #0B0F17; border: 1px solid #1F2937; border-radius: 10px; padding: 12px; margin-bottom: 20px;'>
-                            <p style='font-size: 10px; font-weight: bold; color: #A3E635; margin: 0 0 4px 0;'>RECOMMENDATION</p>
+                        <div style='background-color: #0B0F17; border: 1px solid #1F2937; border-radius: 10px; padding: 12px; margin-bottom: 20px; border-left: 4px solid {risk_color};'>
+                            <p style='font-size: 10px; font-weight: bold; color: {risk_color}; margin: 0 0 4px 0;'>RECOMMENDATION</p>
                             <p style='font-size: 11px; color: #E5E7EB; line-height: 1.4; margin: 0;'>{rec_text}</p>
                         </div>
                     </div>
