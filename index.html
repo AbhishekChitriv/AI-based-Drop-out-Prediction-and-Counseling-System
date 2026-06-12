@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduGuard AI | Drop-out Prediction & Counseling</title>
+    <!-- Local Tailwind CSS Engine -->
+    <script src="tailwind.js"></script>
+    <!-- Local FontAwesome for Icons -->
+    <link rel="stylesheet" href="fontawesome.css">
+    <!-- Local Google Font Import -->
+    <link rel="stylesheet" href="inter.css">
+    <!-- Custom External CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col justify-between selection:bg-lime-400 selection:text-black">
+
+    <!-- AUTHENTICATION OVERLAY PORTAL -->
+    <div id="auth-overlay" class="fixed inset-0 z-50 bg-[#0B0F17] flex items-center justify-center p-4">
+        <!-- Background radial glows -->
+        <div class="absolute inset-0 bg-radial from-lime-500/5 to-transparent pointer-events-none blur-3xl"></div>
+        
+        <div class="bg-[#121824]/90 border border-gray-800 w-full max-w-md rounded-3xl p-8 shadow-2xl relative z-10 space-y-6 modal-animation backdrop-blur-md">
+            <!-- Portal Header -->
+            <div class="text-center space-y-3">
+                <img src="portal_logo.jpg" class="w-full h-auto rounded-2xl mb-3 shadow-lg border border-gray-800 object-contain" alt="EduGuard AI Portal Logo">
+                <h3 class="text-2xl font-bold text-white tracking-tight">EduGuard AI Portal</h3>
+            </div>
+
+            <!-- Email Entry Stage -->
+            <form id="auth-email-form" class="space-y-4">
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider">Enter your email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500 text-sm">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        <input type="email" id="auth-email" placeholder="example@gmail.com" required class="w-full bg-[#0B0F17] border border-gray-800 focus:border-lime-400 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none transition">
+                    </div>
+                </div>
+                <button type="submit" id="auth-email-submit" class="w-full bg-lime-400 hover:bg-lime-500 text-black font-bold py-3.5 rounded-xl transition text-sm cursor-pointer shadow-lg shadow-lime-400/10 flex items-center justify-center gap-2">
+                    <span>Sign In / Sign Up</span> <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+
+            <!-- OTP Verification Stage (Hidden by Default) -->
+            <form id="auth-otp-form" class="hidden space-y-4">
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider">One-Time Password (OTP)</label>
+                        <span id="auth-otp-timer" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">05:00</span>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500 text-sm">
+                            <i class="fa-solid fa-key"></i>
+                        </span>
+                        <input type="text" id="auth-otp" placeholder="6-digit verification code" pattern="[0-9]{6}" maxlength="6" required class="w-full bg-[#0B0F17] border border-gray-800 focus:border-lime-400 rounded-xl py-3 pl-10 pr-4 text-sm text-white tracking-widest font-mono focus:outline-none transition">
+                    </div>
+                </div>
+                
+                <button type="submit" id="auth-otp-submit" class="w-full bg-lime-400 hover:bg-lime-500 text-black font-bold py-3.5 rounded-xl transition text-sm cursor-pointer shadow-lg shadow-lime-400/10 flex items-center justify-center gap-2">
+                    <span>Verify & Unlock</span> <i class="fa-solid fa-lock-open text-xs"></i>
+                </button>
+
+                <div class="flex justify-between text-xs pt-1">
+                    <button type="button" id="auth-back-btn" class="text-gray-400 hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-chevron-left text-[10px]"></i> Change Email
+                    </button>
+                    <button type="button" id="auth-resend-btn" class="text-lime-400 hover:text-lime-500 font-semibold transition cursor-pointer">
+                        Resend Code
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="border-b border-gray-800 bg-[#0B0F17]/80 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="bg-lime-400 text-black p-2 rounded-lg font-bold tracking-wider text-xl">EG</div>
+                <span class="text-xl font-bold tracking-tight text-white">EduGuard <span class="text-lime-400">AI</span></span>
+            </div>
+            
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
+                <a href="#" class="text-white hover:text-lime-400 transition">Home</a>
+                <a href="#features" class="hover:text-lime-400 transition">Features</a>
+                <a href="#predictor" class="hover:text-lime-400 transition">Predictor</a>
+                <a href="#analytics" class="hover:text-lime-400 transition">Dashboard</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <div
+                  id="open-login-btn"
+                  aria-label="User Login Button"
+                  tabindex="0"
+                  role="button"
+                  class="user-profile"
+                >
+                  <div class="user-profile-inner">
+                    <svg
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                    >
+                      <g data-name="Layer 2" id="Layer_2">
+                        <path
+                          d="m15.626 11.769a6 6 0 1 0 -7.252 0 9.008 9.008 0 0 0 -5.374 8.231 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 9.008 9.008 0 0 0 -5.374-8.231zm-7.626-4.769a4 4 0 1 1 4 4 4 4 0 0 1 -4-4zm10 14h-12a1 1 0 0 1 -1-1 7 7 0 0 1 14 0 1 1 0 0 1 -1 1z"
+                        ></path>
+                      </g>
+                    </svg>
+                    <p>Log In</p>
+                  </div>
+                </div>
+                <button id="logout-btn" class="hidden text-xs text-red-400 hover:text-red-300 font-semibold cursor-pointer border border-red-500/20 hover:border-red-500/40 bg-red-500/10 px-3.5 py-2.5 rounded-xl transition">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN HERO & CONTENT -->
+    <main class="flex-grow">
+        <section class="max-w-7xl mx-auto px-6 pt-16 pb-24 grid md:grid-cols-12 gap-12 items-center relative">
+            <div class="absolute inset-0 bg-radial from-lime-500/5 to-transparent pointer-events-none blur-3xl"></div>
+            
+            <div class="md:col-span-7 space-y-6 relative z-10">
+                <div class="inline-flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-full text-xs text-lime-400 font-semibold tracking-wide">
+                    <span class="w-2 h-2 rounded-full bg-lime-400 animate-pulse"></span> Intelligent Student Retention
+                </div>
+                <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight">
+                    Innovative AI Solutions <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-400">That Prevent Drop-outs</span>
+                </h1>
+                <p class="text-gray-400 text-lg max-w-xl">
+                    EduGuard AI combines predictive machine learning with automated empathetic counseling frameworks to discover at-risk students before they disengage.
+                </p>
+                <div class="flex items-center gap-4 pt-4">
+                    <a href="#analytics" class="bg-gray-900 border border-gray-800 hover:border-lime-400/50 text-white px-6 py-3 rounded-full text-sm font-medium transition flex items-center gap-2">
+                        View Dashboard <i class="fa-solid fa-arrow-right text-xs text-lime-400"></i>
+                    </a>
+                    <button id="hero-get-started-btn" class="border border-lime-400/30 hover:bg-lime-400/10 text-lime-400 px-6 py-3 rounded-full text-sm font-medium transition cursor-pointer">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+
+            <!-- Visual Graphic Placeholder -->
+            <div class="md:col-span-5 relative flex justify-center">
+                <div class="relative w-80 h-80 md:w-96 md:h-96 rounded-full bg-gradient-to-tr from-lime-400 to-emerald-500 p-1 flex items-center justify-center lime-glow">
+                    <div class="w-full h-full bg-[#121824] rounded-full overflow-hidden flex items-center justify-center p-4 relative">
+                        <img src="hero_graphic.png" class="w-full h-full object-contain rounded-full" alt="AI Academic Counseling">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUB-BAR SCROLLER -->
+        <div class="bg-lime-400 text-black py-4 font-bold uppercase tracking-wider text-xs overflow-hidden whitespace-nowrap border-y border-lime-500">
+            <div class="flex justify-around items-center gap-8 px-6">
+                <span><i class="fa-solid fa-brain mr-2"></i> Predictive Analytics</span>
+                <span><i class="fa-solid fa-user-doctor mr-2"></i> Automated Counseling</span>
+                <span><i class="fa-solid fa-chart-line mr-2"></i> Retention Tracking</span>
+                <span class="hidden md:inline"><i class="fa-solid fa-graduation-cap mr-2"></i> Academic Health Index</span>
+            </div>
+        </div>
+
+        <!-- FEATURES SECTION -->
+        <section id="features" class="max-w-7xl mx-auto px-6 py-20">
+            <div class="text-center max-w-xl mx-auto mb-16 space-y-3">
+                <span class="text-lime-400 text-xs font-bold tracking-widest uppercase">System Core Capabilities</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Delivering Value Through Advanced Core Services</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-[#121824] p-8 rounded-2xl border border-gray-800 hover:border-lime-400/30 transition-all group">
+                    <img src="feature_1.png" class="card-icon w-12 h-12 rounded-xl object-cover mb-6 transition-all" alt="Early Drop-out Risk AI">
+                    <h3 class="text-xl font-bold text-white mb-2">Early Drop-out Risk AI</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                        Scans academic performance, socio-economic factors, and system engagement data models to detect drop-out warnings.
+                    </p>
+                    <a href="#" class="text-lime-400 text-xs font-semibold flex items-center gap-1 group-hover:underline">Read More <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-[#121824] p-8 rounded-2xl border border-gray-800 hover:border-lime-400/30 transition-all group">
+                    <img src="feature_2.png" class="card-icon w-12 h-12 rounded-xl object-cover mb-6 transition-all" alt="Early Drop-out Risk AI">
+                    <h3 class="text-xl font-bold text-white mb-2">Early Drop-out Risk AI</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                        Deploys tailored messaging, dynamic calendar invites for human expert sessions, and digital modular guidance based on risks.
+                    </p>
+                    <a href="#" class="text-lime-400 text-xs font-semibold flex items-center gap-1 group-hover:underline">Read More <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-[#121824] p-8 rounded-2xl border border-gray-800 hover:border-lime-400/30 transition-all group">
+                    <img src="feature_3.png" class="card-icon w-12 h-12 rounded-xl object-cover mb-6 transition-all" alt="Institutional Dashboards">
+                    <h3 class="text-xl font-bold text-white mb-2">Institutional Dashboards</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                        Empowers system administrators, university principals, and mentors with full access cohorts, live trends, and behavioral health metrics.
+                    </p>
+                    <a href="#" class="text-lime-400 text-xs font-semibold flex items-center gap-1 group-hover:underline">Read More <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- PREDICTOR SECTION -->
+        <section id="predictor" class="border-t border-gray-800 bg-[#0B0F17] py-20 relative">
+            <div class="absolute inset-0 bg-radial from-emerald-500/5 to-transparent pointer-events-none blur-3xl"></div>
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-xl mx-auto mb-12 space-y-3">
+                    <span class="text-lime-400 text-xs font-bold tracking-widest uppercase">Machine Learning Predictor</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">Evaluate Student Drop-out Risk</h2>
+                    <p class="text-gray-400 text-sm">
+                        Enter student academic metrics and socio-economic data below. Our trained XGBoost AI engine will calculate drop-out probability immediately.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-12 gap-8 items-stretch">
+                    <!-- Input Form Panel -->
+                    <form id="prediction-form" class="md:col-span-8 bg-[#121824] border border-gray-800 rounded-2xl p-6 md:p-8 space-y-6 shadow-2xl">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Name & Education -->
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider mb-2">Student Name</label>
+                                <input type="text" id="predictor-name" value="Jane Doe" required class="w-full bg-[#0B0F17] border border-gray-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-lime-400 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider mb-2">Education Level</label>
+                                <select id="predictor-education" class="w-full bg-[#0B0F17] border border-gray-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-lime-400 transition cursor-pointer">
+                                    <option value="High School">High School</option>
+                                    <option value="Bachelor" selected>Bachelor</option>
+                                    <option value="Master">Master</option>
+                                    <option value="PhD">PhD</option>
+                                </select>
+                            </div>
+
+                            <!-- Age & Income -->
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider mb-2">Age</label>
+                                <input type="number" id="predictor-age" value="21" min="15" max="100" required class="w-full bg-[#0B0F17] border border-gray-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-lime-400 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider mb-2">Family Annual Income ($)</label>
+                                <input type="number" id="predictor-income" value="45000" min="0" required class="w-full bg-[#0B0F17] border border-gray-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-lime-400 transition">
+                            </div>
+
+                            <!-- Study Hours & Attendance -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Study Hours per Day</label>
+                                    <span id="study-hours-val" class="text-xs font-bold text-lime-400 bg-lime-400/10 px-2 py-0.5 rounded">6.0 hrs</span>
+                                </div>
+                                <input type="range" id="predictor-study-hours" min="1" max="15" step="0.5" value="6" class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-lime-400">
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Attendance Rate (%)</label>
+                                    <span id="attendance-val" class="text-xs font-bold text-lime-400 bg-lime-400/10 px-2 py-0.5 rounded">88%</span>
+                                </div>
+                                <input type="range" id="predictor-attendance" min="0" max="100" step="1" value="88" class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-lime-400">
+                            </div>
+
+                            <!-- Assignment Delay & Travel Time -->
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider mb-2">Assignment Delay Days</label>
+                                <input type="number" id="predictor-delay" value="2" min="0" max="30" required class="w-full bg-[#0B0F17] border border-gray-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-lime-400 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider mb-2">Travel Time (Minutes)</label>
+                                <input type="number" id="predictor-travel" value="30" min="0" max="180" required class="w-full bg-[#0B0F17] border border-gray-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-lime-400 transition">
+                            </div>
+
+                            <!-- GPA & Stress Index -->
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider mb-2">GPA (0.00 - 4.00)</label>
+                                <input type="number" id="predictor-gpa" value="3.15" min="0.0" max="4.0" step="0.01" required class="w-full bg-[#0B0F17] border border-gray-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-lime-400 transition">
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Stress Index (1-10)</label>
+                                    <span id="stress-val" class="text-xs font-bold text-lime-400 bg-lime-400/10 px-2 py-0.5 rounded">4/10</span>
+                                </div>
+                                <input type="range" id="predictor-stress" min="1" max="10" step="1" value="4" class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-lime-400">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-lime-400 hover:bg-lime-500 text-black font-bold py-4 rounded-xl transition text-sm cursor-pointer shadow-lg shadow-lime-400/10 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Run AI Prediction
+                        </button>
+                    </form>
+
+                    <!-- Results Panel -->
+                    <div class="md:col-span-4 bg-[#121824] border border-gray-800 rounded-2xl flex flex-col justify-between overflow-hidden shadow-2xl relative">
+                        <!-- Background pulse design element -->
+                        <div class="absolute inset-0 bg-radial from-lime-500/[0.02] to-transparent pointer-events-none"></div>
+                        
+                        <!-- Initial State -->
+                        <div id="results-placeholder" class="h-full flex flex-col items-center justify-center text-center p-8 space-y-4 relative z-10">
+                            <img src="idle_student.png" class="w-24 h-24 object-contain rounded-2xl mb-2" alt="Worried Student">
+                            <h3 class="text-lg font-semibold text-white">System Idle</h3>
+                            <p class="text-gray-400 text-xs leading-relaxed max-w-xs">Fill in the student's academic and socio-economic indicators and click "Run AI Prediction" to evaluate drop-out risk status.</p>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="results-loading" class="hidden h-full flex flex-col items-center justify-center text-center p-8 space-y-4 relative z-10">
+                            <div class="text-lime-400 text-5xl animate-spin mb-2"><i class="fa-solid fa-circle-notch"></i></div>
+                            <h3 class="text-lg font-semibold text-white">Evaluating Risk Cohort...</h3>
+                            <p class="text-gray-400 text-xs leading-relaxed max-w-xs">XGBoost classifier analyzing student attendance, GPA, delay days, and stress metrics...</p>
+                        </div>
+
+                        <!-- Prediction Display State -->
+                        <div id="results-display" class="hidden h-full flex flex-col justify-between p-6 md:p-8 space-y-6 relative z-10">
+                            <div class="text-center space-y-1">
+                                <span class="text-[10px] font-bold tracking-widest text-lime-400 uppercase">AI Evaluation Result</span>
+                                <h3 class="text-xl font-bold text-white" id="result-student-title">Jane Doe</h3>
+                                <div class="text-[10px] text-gray-500 font-semibold" id="result-education-level">Education Level: Bachelor (Code: 0)</div>
+                            </div>
+                            
+                            <!-- Risk Score Indicator -->
+                            <div class="flex flex-col items-center justify-center py-2 relative">
+                                <div class="relative w-36 h-36 flex items-center justify-center">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="42" stroke="#1f2937" stroke-width="8" fill="transparent" />
+                                        <circle id="result-progress-ring" cx="50" cy="50" r="42" stroke="#a3e635" stroke-width="8" fill="transparent"
+                                            stroke-dasharray="263.89" stroke-dashoffset="263.89" stroke-linecap="round" class="transition-all duration-1000 ease-out" />
+                                    </svg>
+                                    <div class="absolute text-center">
+                                        <span class="text-3xl font-extrabold text-white" id="result-risk-percentage">0%</span>
+                                        <div class="text-[9px] font-bold uppercase tracking-wider text-gray-400">Dropout Risk</div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border animate-pulse" id="result-risk-badge">
+                                    LOW RISK
+                                </div>
+                            </div>
+                            
+                            <!-- Recommendations -->
+                            <div class="bg-[#0B0F17] border border-gray-800 rounded-xl p-4 space-y-1">
+                                <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-wider"><i class="fa-solid fa-list-check text-lime-400 mr-1.5"></i> Recommendation</h4>
+                                <p class="text-xs text-gray-300 leading-relaxed" id="result-recommendation">No high risk indicators found. Maintain regular monitoring.</p>
+                            </div>
+
+                            <div class="flex gap-2.5 pt-2">
+                                <button id="add-to-dashboard-btn" type="button" class="flex-grow bg-lime-400 hover:bg-lime-500 text-black py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                    <i class="fa-solid fa-plus"></i> Save to Dashboard
+                                </button>
+                                <button id="discuss-counselor-btn" type="button" class="flex-grow border border-lime-400/30 hover:bg-lime-400/10 text-lime-400 py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                    <i class="fa-solid fa-comments"></i> Discuss with AI
+                                </button>
+                                <button id="reset-prediction-btn" type="button" class="border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white px-3.5 py-3 rounded-xl text-xs font-semibold transition cursor-pointer">
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PREVIEW DATA TABLE -->
+        <section id="analytics" class="border-t border-gray-800 bg-[#090d14] py-20">
+            <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-12 items-center">
+                <div class="md:col-span-4 space-y-4">
+                    <span class="text-lime-400 text-xs font-bold tracking-widest uppercase">— SYSTEM STATUS</span>
+                    <h2 class="text-3xl font-bold text-white">Real-Time Drop-Out Risk Dashboard</h2>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Our integrated analytics stack runs calculations seamlessly to flag predictive parameters immediately.
+                    </p>
+                </div>
+
+                <div class="md:col-span-8 bg-[#121824] border border-gray-800 rounded-2xl p-6 shadow-2xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-gray-400">
+                            <thead>
+                                <tr class="border-b border-gray-800 text-gray-500 uppercase tracking-wider">
+                                    <th class="pb-3 font-semibold">Student Name</th>
+                                    <th class="pb-3 font-semibold">Risk Level</th>
+                                    <th class="pb-3 font-semibold text-right">Action Trigger</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800/50">
+                                <tr>
+                                    <td class="py-4 font-medium text-white">John Doe</td>
+                                    <td class="py-4"><span class="bg-red-500/10 text-red-400 px-2 py-0.5 rounded font-bold">87% CRITICAL</span></td>
+                                    <td class="py-4 text-right"><button type="button" class="bg-lime-400 text-black px-3 py-1 rounded font-bold hover:bg-lime-500 transition dispatch-counsel-btn">Counsel AI</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 font-medium text-white">Amara Smith</td>
+                                    <td class="py-4"><span class="bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-bold">54% MEDIUM</span></td>
+                                    <td class="py-4 text-right"><button type="button" class="border border-gray-700 text-gray-300 px-3 py-1 rounded font-bold hover:border-lime-400 transition dispatch-counsel-btn">Counsel AI</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-800 bg-[#0B0F17] py-6">
+        <div class="max-w-7xl mx-auto px-6 text-center text-xs text-gray-500">
+            &copy; 2026 EduGuard AI Solutions Inc. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- LOGIN MODAL CONTAINER -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#121824] w-full max-w-md rounded-2xl border border-gray-800 p-8 relative shadow-2xl modal-animation">
+            
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg cursor-pointer">
+                <img src="cross_button.png" class="w-5 h-5 object-contain" alt="Close">
+            </button>
+
+            <div class="text-center mb-6 space-y-2">
+                <div class="inline-flex bg-lime-400 text-black p-2 rounded-lg font-bold text-sm mx-auto">EG</div>
+                <h3 class="text-2xl font-bold text-white">Welcome Back</h3>
+                <p class="text-gray-400 text-xs">Enter system credentials to access counselor control boards</p>
+            </div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider mb-2">Email Address</label>
+                    <input type="email" placeholder="counselor@university.edu" required class="w-full bg-[#0B0F17] border border-gray-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-lime-400 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-400 tracking-wider mb-2">Password</label>
+                    <input type="password" placeholder="••••••••" required class="w-full bg-[#0B0F17] border border-gray-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-lime-400 transition">
+                </div>
+                <button type="submit" class="w-full bg-lime-400 hover:bg-lime-500 text-black font-semibold py-3 rounded-xl transition text-sm mt-2">
+                    Sign In Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PERSISTENT RIGHT-SIDE CHATBOT PANEL (Colab Gemini-style) -->
+    <div id="chatbot-floating-container" class="hidden fixed right-0 top-20 bottom-0 z-40 flex flex-col items-stretch w-80 md:w-1/4 border-l border-gray-800">
+        <!-- Chat Panel Window -->
+        <div id="chat-widget-panel" class="w-full h-full bg-[#121824]/95 flex flex-col justify-between overflow-hidden backdrop-blur-md modal-animation">
+            <!-- Chat Header -->
+            <div class="bg-[#0B0F17] border-b border-gray-800 p-4 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <img src="counselor_avatar.jpg" class="w-8 h-8 rounded-lg object-cover" alt="AI Academic Counselor">
+                    <div>
+                        <h4 class="text-sm font-bold text-white">AI Academic Counselor</h4>
+                        <span class="text-[9px] text-lime-400 font-semibold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-lime-400 animate-pulse"></span> Online
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Stream Area -->
+            <div id="chat-messages-container" class="flex-grow p-4 overflow-y-auto space-y-3.5 text-xs">
+                <!-- Welcome greeting bubble -->
+                <div class="flex items-start gap-2.5 max-w-[85%]">
+                    <img src="counselor_avatar.jpg" class="w-6 h-6 rounded-md object-cover shrink-0" alt="Counselor Avatar">
+                    <div class="bg-gray-950 border border-gray-800 text-gray-300 p-3 rounded-2xl rounded-tl-none leading-relaxed">
+                        Hello! I am your AI Counselor. Once you analyze a student's risk, click "Discuss with AI" or message me below to formulate coping recommendations.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Suggestions / Quick Actions -->
+            <div id="chat-suggestions" class="px-4 py-2 flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-thin select-none">
+                <button type="button" class="chat-suggestion-chip bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-400 hover:text-white text-[10px] px-2.5 py-1 rounded-full transition cursor-pointer shrink-0">
+                    How can I reduce academic stress?
+                </button>
+                <button type="button" class="chat-suggestion-chip bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-400 hover:text-white text-[10px] px-2.5 py-1 rounded-full transition cursor-pointer shrink-0">
+                    GPA recovery plan
+                </button>
+                <button type="button" class="chat-suggestion-chip bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-400 hover:text-white text-[10px] px-2.5 py-1 rounded-full transition cursor-pointer shrink-0">
+                    Improve attendance tips
+                </button>
+            </div>
+
+            <!-- Input Controls Footer -->
+            <form id="chat-input-form" class="border-t border-gray-800 p-3 flex gap-2 bg-[#0B0F17]">
+                <input type="text" id="chat-message-input" placeholder="Type a message..." required class="flex-grow bg-[#121824] border border-gray-800 focus:border-lime-400 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none transition">
+                <button type="submit" id="chat-send-btn" class="bg-lime-400 hover:bg-lime-500 text-black w-9 h-9 rounded-xl flex items-center justify-center transition cursor-pointer shadow-lg shadow-lime-400/10">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom External JavaScript Reference -->
+    <script src="script.js"></script>
+</body>
+</html>
