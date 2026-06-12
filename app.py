@@ -198,7 +198,17 @@ if not SMTP_PASSKEY:
 def send_otp_email(target_email):
     otp = f"{random.randint(100000, 999999)}"
     
-    # Check if a dedicated sender email is configured
+    # Retrieve credentials dynamically on every call
+    passkey = os.environ.get("SMTP_PASSKEY")
+    if not passkey:
+        try:
+            passkey = st.secrets["SMTP_PASSKEY"]
+        except Exception:
+            pass
+            
+    if not passkey:
+        return False, "SMTP Passkey (SMTP_PASSKEY) is missing or empty in your environment variables/Streamlit Secrets."
+        
     sender_email = os.environ.get("SMTP_EMAIL")
     if not sender_email:
         try:
@@ -238,11 +248,12 @@ def send_otp_email(target_email):
 
     try:
         with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
-            server.login(login_email, SMTP_PASSKEY)
+            server.login(login_email, passkey)
             server.sendmail(login_email, target_email, message.as_string())
         return True, otp
     except Exception as e:
-        return False, f"{str(e)} (Attempted login email: {login_email})"
+        passkey_len = len(passkey) if passkey else 0
+        return False, f"{str(e)} (Attempted login email: {login_email}, Passkey length: {passkey_len})"
 
 # --- GEMINI CHAT CONNECTOR ---
 def get_gemini_response(message, history, student_context):
