@@ -198,21 +198,27 @@ if not SMTP_PASSKEY:
 def send_otp_email(target_email):
     otp = f"{random.randint(100000, 999999)}"
     
-    # Retrieve credentials dynamically on every call
-    passkey = os.environ.get("SMTP_PASSKEY")
+    # Retrieve credentials dynamically on every call (case-insensitive checks)
+    passkey = os.environ.get("SMTP_PASSKEY") or os.environ.get("smtp_passkey")
     if not passkey:
         try:
-            passkey = st.secrets["SMTP_PASSKEY"]
+            if "SMTP_PASSKEY" in st.secrets:
+                passkey = st.secrets["SMTP_PASSKEY"]
+            elif "smtp_passkey" in st.secrets:
+                passkey = st.secrets["smtp_passkey"]
         except Exception:
             pass
             
     if not passkey:
         return False, "SMTP Passkey (SMTP_PASSKEY) is missing or empty in your environment variables/Streamlit Secrets."
         
-    sender_email = os.environ.get("SMTP_EMAIL")
+    sender_email = os.environ.get("SMTP_EMAIL") or os.environ.get("smtp_email")
     if not sender_email:
         try:
-            sender_email = st.secrets["SMTP_EMAIL"]
+            if "SMTP_EMAIL" in st.secrets:
+                sender_email = st.secrets["SMTP_EMAIL"]
+            elif "smtp_email" in st.secrets:
+                sender_email = st.secrets["smtp_email"]
         except Exception:
             pass
             
@@ -254,14 +260,17 @@ def send_otp_email(target_email):
     except Exception as e:
         passkey_len = len(passkey) if passkey else 0
         return False, f"{str(e)} (Attempted login email: {login_email}, Passkey length: {passkey_len})"
-
+ 
 # --- GEMINI CHAT CONNECTOR ---
 def get_gemini_response(message, history, student_context):
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("gemini_api_key")
     # Streamlit Cloud secrets compatibility fallback
     if not api_key:
         try:
-            api_key = st.secrets["GEMINI_API_KEY"]
+            if "GEMINI_API_KEY" in st.secrets:
+                api_key = st.secrets["GEMINI_API_KEY"]
+            elif "gemini_api_key" in st.secrets:
+                api_key = st.secrets["gemini_api_key"]
         except Exception:
             pass
             
