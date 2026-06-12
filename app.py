@@ -198,10 +198,21 @@ if not SMTP_PASSKEY:
 def send_otp_email(target_email):
     otp = f"{random.randint(100000, 999999)}"
     
+    # Check if a dedicated sender email is configured
+    sender_email = os.environ.get("SMTP_EMAIL")
+    if not sender_email:
+        try:
+            sender_email = st.secrets["SMTP_EMAIL"]
+        except Exception:
+            pass
+            
+    # Fallback to the target email if no sender_email is configured
+    login_email = sender_email if sender_email else target_email
+    
     # Prepare email body
     message = MIMEMultipart("alternative")
     message["Subject"] = "EduGuard AI - Verification Code"
-    message["From"] = f"EduGuard AI Security <{target_email}>"
+    message["From"] = f"EduGuard AI Security <{login_email}>"
     message["To"] = target_email
 
     html = f"""
@@ -227,8 +238,8 @@ def send_otp_email(target_email):
 
     try:
         with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
-            server.login(target_email, SMTP_PASSKEY)
-            server.sendmail(target_email, target_email, message.as_string())
+            server.login(login_email, SMTP_PASSKEY)
+            server.sendmail(login_email, target_email, message.as_string())
         return True, otp
     except Exception as e:
         return False, str(e)
