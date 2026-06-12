@@ -242,7 +242,7 @@ def send_otp_email(target_email):
             server.sendmail(login_email, target_email, message.as_string())
         return True, otp
     except Exception as e:
-        return False, str(e)
+        return False, f"{str(e)} (Attempted login email: {login_email})"
 
 # --- GEMINI CHAT CONNECTOR ---
 def get_gemini_response(message, history, student_context):
