@@ -381,9 +381,12 @@ def chat():
         if resp.status_code != 200:
             print("Gemini API call failed with status:", resp.status_code)
             print("Response:", resp.text)
+            err_msg = 'Failed to fetch counseling response from Gemini API.'
+            if resp.status_code == 400 and ("API_KEY_INVALID" in resp.text or "API key not valid" in resp.text):
+                err_msg = 'Invalid Gemini API Key. Please configure a valid GEMINI_API_KEY (starting with AIzaSy) in your environment variables or .env file.'
             return jsonify({
                 'status': 'error',
-                'message': 'Failed to fetch counseling response from Gemini API.'
+                'message': err_msg
             }), 500
 
         resp_data = resp.json()

@@ -334,6 +334,8 @@ def get_gemini_response(message, history, student_context):
         if resp.status_code == 200:
             return resp.json()['candidates'][0]['content']['parts'][0]['text']
         else:
+            if resp.status_code == 400 and ("API_KEY_INVALID" in resp.text or "API key not valid" in resp.text):
+                return "⚠️ **Invalid Gemini API Key**. Please ensure you have set a valid `GEMINI_API_KEY` (starting with `AIzaSy`) in your `.env` file or Streamlit Cloud Secrets."
             return f"Error from Gemini API: {resp.status_code} - {resp.text}"
     except Exception as e:
         return f"Connection Error: {str(e)}"
@@ -555,31 +557,15 @@ else:
                     if res["Stress_Index"] > 7:
                         rec_text = "Student is academically sound but reports high stress levels. Advise mental wellness resources."
 
-                # Circumference of radius 42 is 263.89
-                offset = 263.89 - (263.89 * min(max(float(risk), 0.0), 100.0)) / 100.0
-
                 st.markdown(f"""
                     <div style='background-color: #121824; border: 1px solid #1F2937; border-radius: 16px; padding: 20px;'>
                         <h3 style='color: white; margin: 0;'>{res['name']}</h3>
                         <p style='font-size: 11px; color: #9CA3AF; margin-top: 4px; margin-bottom: 20px;'>Level: {res['Education_Level']}</p>
                         
-                        <div style="display: flex; flex-direction: column; align-items: center; margin: 20px 0;">
-                            <div style="position: relative; width: 120px; height: 120px;">
-                                <svg width="120" height="120" viewBox="0 0 120 120" style="transform: rotate(-90deg);">
-                                    <!-- Gray Background Ring -->
-                                    <circle cx="60" cy="60" r="42" stroke="#1F2937" stroke-width="8" fill="transparent" />
-                                    <!-- Colored Severity Progress Ring -->
-                                    <circle cx="60" cy="60" r="42" stroke="{risk_color}" stroke-width="8" fill="transparent"
-                                            stroke-dasharray="263.89" stroke-dashoffset="{offset}" stroke-linecap="round" />
-                                </svg>
-                                <!-- Centered Percentage Text -->
-                                <div style="position: absolute; top: 0; left: 0; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                                    <span style="font-size: 22px; font-weight: 800; color: white; font-family: sans-serif;">{risk:.2f}%</span>
-                                    <span style="font-size: 8px; font-weight: bold; text-transform: uppercase; color: #9CA3AF; margin-top: 2px;">Risk Score</span>
-                                </div>
-                            </div>
-                            <p style="font-size: 10px; color: #9CA3AF; text-transform: uppercase; margin-top: 12px; margin-bottom: 8px; letter-spacing: 0.5px;">Dropout Risk Probability</p>
-                            <div>{badge_html}</div>
+                        <div style='text-align: center; margin: 20px 0;'>
+                            <h2 style='font-size: 40px; font-weight: 800; color: {risk_color}; margin: 0;'>{risk:.2f}%</h2>
+                            <p style='font-size: 10px; color: #9CA3AF; text-transform: uppercase;'>Dropout Risk Probability</p>
+                            <div style='margin-top: 10px;'>{badge_html}</div>
                         </div>
                         
                         <div style='background-color: #0B0F17; border: 1px solid #1F2937; border-radius: 10px; padding: 12px; margin-bottom: 20px; border-left: 4px solid {risk_color};'>

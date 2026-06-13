@@ -506,10 +506,12 @@ if (predictionForm) {
                 resultRiskPercentage.innerText = `${result.risk_probability.toFixed(2)}%`;
 
                 // Update Progress Ring (radius = 42, circumference = 263.89)
-                const circumference = 2 * Math.PI * 42;
-                const offset = circumference - (circumference * result.risk_probability) / 100;
-                resultProgressRing.style.strokeDasharray = `${circumference}`;
-                resultProgressRing.style.strokeDashoffset = `${offset}`;
+                if (resultProgressRing) {
+                    const circumference = 2 * Math.PI * 42;
+                    const offset = circumference - (circumference * result.risk_probability) / 100;
+                    resultProgressRing.style.strokeDasharray = `${circumference}`;
+                    resultProgressRing.style.strokeDashoffset = `${offset}`;
+                }
 
                 // Update risk badge classes and recommendations
                 let badgeText = "LOW RISK";
@@ -553,7 +555,12 @@ if (predictionForm) {
                 resultRiskBadge.innerText = badgeText;
                 badgeClasses.forEach(c => resultRiskBadge.classList.add(c));
                 resultRecommendation.innerText = recommendationText;
-                resultProgressRing.style.stroke = ringColor;
+                if (resultProgressRing) {
+                    resultProgressRing.style.stroke = ringColor;
+                }
+                if (resultRiskPercentage) {
+                    resultRiskPercentage.style.color = ringColor;
+                }
 
                 // Transition states
                 resultsLoading.classList.add('hidden');
