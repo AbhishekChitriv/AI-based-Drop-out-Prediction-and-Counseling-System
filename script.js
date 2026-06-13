@@ -503,7 +503,7 @@ if (predictionForm) {
                 // 4. Update display fields
                 resultStudentTitle.innerText = studentName;
                 resultEducationLevel.innerText = `Education Level: ${payload.Education_Level} (Encoded Code: ${result.encoded_education_level})`;
-                resultRiskPercentage.innerText = `${result.risk_probability}%`;
+                resultRiskPercentage.innerText = `${result.risk_probability.toFixed(2)}%`;
 
                 // Update Progress Ring (radius = 42, circumference = 263.89)
                 const circumference = 2 * Math.PI * 42;
@@ -610,7 +610,7 @@ if (addToDashboardBtn) {
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
             <td class="py-4 font-medium text-white">${name}</td>
-            <td class="py-4"><span class="${badgeColorClass} px-2 py-0.5 rounded font-bold">${risk_probability}% ${badgeLabel}</span></td>
+            <td class="py-4"><span class="${badgeColorClass} px-2 py-0.5 rounded font-bold">${risk_probability.toFixed(2)}% ${badgeLabel}</span></td>
             <td class="py-4 text-right">
                 <button class="${btnBorderClass} px-3 py-1 rounded font-bold transition dispatch-counsel-btn">Counsel AI</button>
             </td>

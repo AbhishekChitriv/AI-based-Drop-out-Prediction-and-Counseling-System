@@ -558,7 +558,7 @@ else:
                         <p style='font-size: 11px; color: #9CA3AF; margin-top: 4px; margin-bottom: 20px;'>Level: {res['Education_Level']}</p>
                         
                         <div style='text-align: center; margin: 20px 0;'>
-                            <h2 style='font-size: 40px; font-weight: 800; color: {risk_color}; margin: 0;'>{risk}%</h2>
+                            <h2 style='font-size: 40px; font-weight: 800; color: {risk_color}; margin: 0;'>{risk:.2f}%</h2>
                             <p style='font-size: 10px; color: #9CA3AF; text-transform: uppercase;'>Dropout Risk Probability</p>
                             <div style='margin-top: 10px;'>{badge_html}</div>
                         </div>
@@ -585,7 +585,7 @@ else:
                         # Populate chatbot context welcome bubble
                         risk_lvl = "Critical Risk" if risk >= 70 else ("Medium Risk" if risk >= 30 else "Low Risk")
                         welcome_txt = (
-                            f"AI Counselor has loaded **{res['name']}**'s academic profile (Risk: **{risk}% {risk_lvl}**, "
+                            f"AI Counselor has loaded **{res['name']}**'s academic profile (Risk: **{risk:.2f}% {risk_lvl}**, "
                             f"GPA: **{res['GPA']}**, Attendance: **{res['Attendance_Rate']}%**).\n\n"
                             f"How can I help you compile coping plans or analyze risk indicators for {res['name']}?"
                         )
@@ -608,7 +608,7 @@ else:
                 lbl = "CRITICAL" if risk_val >= 70 else ("MEDIUM" if risk_val >= 30 else "LOW")
                 dash_df_list.append({
                     "Student Name": student['name'],
-                    "Risk Level": f"{risk_val}% {lbl}",
+                    "Risk Level": f"{risk_val:.2f}% {lbl}",
                     "GPA": student['GPA'],
                     "Attendance": f"{student['Attendance_Rate']}%"
                 })
@@ -625,7 +625,7 @@ else:
                     risk_v = matched_std['risk_probability']
                     risk_lvl = "Critical Risk" if risk_v >= 70 else ("Medium Risk" if risk_v >= 30 else "Low Risk")
                     welcome_txt = (
-                        f"AI Counselor has loaded **{matched_std['name']}**'s academic profile (Risk: **{risk_v}% {risk_lvl}**, "
+                        f"AI Counselor has loaded **{matched_std['name']}**'s academic profile (Risk: **{risk_v:.2f}% {risk_lvl}**, "
                         f"GPA: **{matched_std['GPA']}**, Attendance: **{matched_std['Attendance_Rate']}%**).\n\n"
                         f"How can I help you compile coping plans or analyze risk indicators for {matched_std['name']}?"
                     )
