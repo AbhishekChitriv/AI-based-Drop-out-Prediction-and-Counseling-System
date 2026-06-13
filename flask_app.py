@@ -327,7 +327,7 @@ def chat():
             simulated = get_simulated_response(user_message, student_context)
             return jsonify({
                 'status': 'success',
-                'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(No Gemini API Key configured)*:\n\n{simulated}"
+                'response': simulated
             })
 
         gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_api_key}"
@@ -400,14 +400,9 @@ def chat():
             print("Gemini API call failed with status:", resp.status_code)
             print("Response:", resp.text)
             simulated = get_simulated_response(user_message, student_context)
-            if resp.status_code == 400 and ("API_KEY_INVALID" in resp.text or "API key not valid" in resp.text):
-                return jsonify({
-                    'status': 'success',
-                    'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(Invalid Gemini API Key configured)*:\n\n{simulated}"
-                })
             return jsonify({
                 'status': 'success',
-                'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(Gemini API Error: {resp.status_code})*:\n\n{simulated}"
+                'response': simulated
             })
 
         resp_data = resp.json()
@@ -420,7 +415,7 @@ def chat():
             simulated = get_simulated_response(user_message, student_context)
             return jsonify({
                 'status': 'success',
-                'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(Error parsing response)*:\n\n{simulated}"
+                'response': simulated
             })
 
         return jsonify({
@@ -435,7 +430,7 @@ def chat():
             simulated = get_simulated_response(user_message, student_context)
             return jsonify({
                 'status': 'success',
-                'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(Server Error: {str(e)})*:\n\n{simulated}"
+                'response': simulated
             })
         except Exception:
             return jsonify({

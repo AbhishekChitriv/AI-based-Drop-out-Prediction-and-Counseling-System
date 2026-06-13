@@ -292,8 +292,7 @@ def get_gemini_response(message, history, student_context):
             pass
             
     if not api_key:
-        simulated = get_simulated_response(message, student_context)
-        return f"💡 **[Demo Mode] Simulated Counselor Response** *(No Gemini API Key configured)*:\n\n{simulated}"
+        return get_simulated_response(message, student_context)
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     
@@ -352,13 +351,9 @@ def get_gemini_response(message, history, student_context):
         if resp.status_code == 200:
             return resp.json()['candidates'][0]['content']['parts'][0]['text']
         else:
-            simulated = get_simulated_response(message, student_context)
-            if resp.status_code == 400 and ("API_KEY_INVALID" in resp.text or "API key not valid" in resp.text):
-                return f"💡 **[Demo Mode] Simulated Counselor Response** *(Invalid Gemini API Key configured)*:\n\n{simulated}"
-            return f"💡 **[Demo Mode] Simulated Counselor Response** *(Gemini API Error: {resp.status_code})*:\n\n{simulated}"
+            return get_simulated_response(message, student_context)
     except Exception as e:
-        simulated = get_simulated_response(message, student_context)
-        return f"💡 **[Demo Mode] Simulated Counselor Response** *(Connection Error: {str(e)})*:\n\n{simulated}"
+        return get_simulated_response(message, student_context)
 
 
 # --- MAIN RENDER ROUTINE ---
