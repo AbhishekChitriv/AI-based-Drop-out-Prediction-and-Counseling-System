@@ -557,23 +557,19 @@ else:
                     if res["Stress_Index"] > 7:
                         rec_text = "Student is academically sound but reports high stress levels. Advise mental wellness resources."
 
-                st.markdown(f"""
-                    <div style='background-color: #121824; border: 1px solid #1F2937; border-radius: 16px; padding: 20px;'>
-                        <h3 style='color: white; margin: 0;'>{res['name']}</h3>
-                        <p style='font-size: 11px; color: #9CA3AF; margin-top: 4px; margin-bottom: 20px;'>Level: {res['Education_Level']}</p>
-                        
-                        <div style='text-align: center; margin: 20px 0;'>
-                            <h2 style='font-size: 40px; font-weight: 800; color: {risk_color}; margin: 0;'>{risk:.2f}%</h2>
-                            <p style='font-size: 10px; color: #9CA3AF; text-transform: uppercase;'>Dropout Risk Probability</p>
-                            <div style='margin-top: 10px;'>{badge_html}</div>
-                        </div>
-                        
-                        <div style='background-color: #0B0F17; border: 1px solid #1F2937; border-radius: 10px; padding: 12px; margin-bottom: 20px; border-left: 4px solid {risk_color};'>
-                            <p style='font-size: 10px; font-weight: bold; color: {risk_color}; margin: 0 0 4px 0;'>RECOMMENDATION</p>
-                            <p style='font-size: 11px; color: #E5E7EB; line-height: 1.4; margin: 0;'>{rec_text}</p>
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
+                st.markdown(f"""<div style='background-color: #121824; border: 1px solid #1F2937; border-radius: 16px; padding: 20px;'>
+<h3 style='color: white; margin: 0;'>{res['name']}</h3>
+<p style='font-size: 11px; color: #9CA3AF; margin-top: 4px; margin-bottom: 20px;'>Level: {res['Education_Level']}</p>
+<div style='text-align: center; margin: 20px 0;'>
+<h2 style='font-size: 40px; font-weight: 800; color: {risk_color}; margin: 0;'>{risk:.2f}%</h2>
+<p style='font-size: 10px; color: #9CA3AF; text-transform: uppercase;'>Dropout Risk Probability</p>
+<div style='margin-top: 10px;'>{badge_html}</div>
+</div>
+<div style='background-color: #0B0F17; border: 1px solid #1F2937; border-radius: 10px; padding: 12px; margin-bottom: 20px; border-left: 4px solid {risk_color};'>
+<p style='font-size: 10px; font-weight: bold; color: {risk_color}; margin: 0 0 4px 0;'>RECOMMENDATION</p>
+<p style='font-size: 11px; color: #E5E7EB; line-height: 1.4; margin: 0;'>{rec_text}</p>
+</div>
+</div>""", unsafe_allow_html=True)
                 
                 c_action1, c_action2 = st.columns(2)
                 with c_action1:
