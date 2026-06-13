@@ -357,8 +357,11 @@ if not st.session_state.authenticated:
         if not st.session_state.otp_sent:
             # Stage 1: Email Input
             st.markdown("<p style='text-align: center; font-size: 13px; color: #9CA3AF;'>Enter your email address to authenticate and access the counselor board.</p>", unsafe_allow_html=True)
-            email_val = st.text_input("Enter your email", placeholder="example@gmail.com")
-            if st.button("Sign In / Sign Up"):
+            with st.form("email_login_form", border=False):
+                email_val = st.text_input("Enter your email", placeholder="example@gmail.com")
+                submit_email = st.form_submit_button("Sign In / Sign Up")
+                
+            if submit_email:
                 if email_val.strip() and "@" in email_val:
                     with st.spinner("Sending verification code..."):
                         success, res = send_otp_email(email_val.strip())
@@ -377,25 +380,25 @@ if not st.session_state.authenticated:
         else:
             # Stage 2: OTP Input
             st.markdown(f"<p style='text-align: center; font-size: 13px; color: #9CA3AF;'>Enter the 6-digit code sent to <b>{st.session_state.email}</b></p>", unsafe_allow_html=True)
-            otp_val = st.text_input("One-Time Password (OTP)", placeholder="6-digit verification code", max_chars=6)
-            
-            c1, c2 = st.columns(2)
-            with c1:
-                if st.button("Verify & Unlock"):
-                    if time.time() > st.session_state.otp_expires:
-                        st.error("Verification code has expired. Please request a new code.")
-                    elif otp_val.strip() == st.session_state.otp_code:
-                        st.session_state.authenticated = True
-                        st.session_state.otp_sent = False
-                        st.session_state.otp_code = ""
-                        st.rerun()
-                    else:
-                        st.error("Invalid verification code. Please try again.")
-            with c2:
-                if st.button("Back / Change Email"):
+            with st.form("otp_verification_form", border=False):
+                otp_val = st.text_input("One-Time Password (OTP)", placeholder="6-digit verification code", max_chars=6)
+                submit_otp = st.form_submit_button("Verify & Unlock")
+                
+            if submit_otp:
+                if time.time() > st.session_state.otp_expires:
+                    st.error("Verification code has expired. Please request a new code.")
+                elif otp_val.strip() == st.session_state.otp_code:
+                    st.session_state.authenticated = True
                     st.session_state.otp_sent = False
                     st.session_state.otp_code = ""
                     st.rerun()
+                else:
+                    st.error("Invalid verification code. Please try again.")
+            
+            if st.button("Back / Change Email"):
+                st.session_state.otp_sent = False
+                st.session_state.otp_code = ""
+                st.rerun()
 else:
     # --- DASHBOARD & CHAT LAYOUT ---
     
@@ -552,15 +555,31 @@ else:
                     if res["Stress_Index"] > 7:
                         rec_text = "Student is academically sound but reports high stress levels. Advise mental wellness resources."
 
+                # Circumference of radius 42 is 263.89
+                offset = 263.89 - (263.89 * min(max(float(risk), 0.0), 100.0)) / 100.0
+
                 st.markdown(f"""
                     <div style='background-color: #121824; border: 1px solid #1F2937; border-radius: 16px; padding: 20px;'>
                         <h3 style='color: white; margin: 0;'>{res['name']}</h3>
                         <p style='font-size: 11px; color: #9CA3AF; margin-top: 4px; margin-bottom: 20px;'>Level: {res['Education_Level']}</p>
                         
-                        <div style='text-align: center; margin: 20px 0;'>
-                            <h2 style='font-size: 40px; font-weight: 800; color: {risk_color}; margin: 0;'>{risk:.2f}%</h2>
-                            <p style='font-size: 10px; color: #9CA3AF; text-transform: uppercase;'>Dropout Risk Probability</p>
-                            <div style='margin-top: 10px;'>{badge_html}</div>
+                        <div style="display: flex; flex-direction: column; align-items: center; margin: 20px 0;">
+                            <div style="position: relative; width: 120px; height: 120px;">
+                                <svg width="120" height="120" viewBox="0 0 120 120" style="transform: rotate(-90deg);">
+                                    <!-- Gray Background Ring -->
+                                    <circle cx="60" cy="60" r="42" stroke="#1F2937" stroke-width="8" fill="transparent" />
+                                    <!-- Colored Severity Progress Ring -->
+                                    <circle cx="60" cy="60" r="42" stroke="{risk_color}" stroke-width="8" fill="transparent"
+                                            stroke-dasharray="263.89" stroke-dashoffset="{offset}" stroke-linecap="round" />
+                                </svg>
+                                <!-- Centered Percentage Text -->
+                                <div style="position: absolute; top: 0; left: 0; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                    <span style="font-size: 22px; font-weight: 800; color: white; font-family: sans-serif;">{risk:.2f}%</span>
+                                    <span style="font-size: 8px; font-weight: bold; text-transform: uppercase; color: #9CA3AF; margin-top: 2px;">Risk Score</span>
+                                </div>
+                            </div>
+                            <p style="font-size: 10px; color: #9CA3AF; text-transform: uppercase; margin-top: 12px; margin-bottom: 8px; letter-spacing: 0.5px;">Dropout Risk Probability</p>
+                            <div>{badge_html}</div>
                         </div>
                         
                         <div style='background-color: #0B0F17; border: 1px solid #1F2937; border-radius: 10px; padding: 12px; margin-bottom: 20px; border-left: 4px solid {risk_color};'>

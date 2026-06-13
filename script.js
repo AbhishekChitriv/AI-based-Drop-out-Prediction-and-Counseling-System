@@ -515,6 +515,7 @@ if (predictionForm) {
                 let badgeText = "LOW RISK";
                 let badgeClasses = ["bg-lime-500/10", "text-lime-400", "border-lime-500/30"];
                 let recommendationText = "Student is currently stable. Maintain standard academic observation and periodic progress checks.";
+                let ringColor = "#a3e635"; // Default low risk color
 
                 // Clear previous badge classes
                 resultRiskBadge.className = "mt-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border";
@@ -523,6 +524,7 @@ if (predictionForm) {
                     badgeText = "CRITICAL RISK";
                     badgeClasses = ["bg-red-500/10", "text-red-400", "border-red-500/30"];
                     recommendationText = "High risk cohort flagged. Recommend dispatching immediate personal counseling invites and academic tutoring support.";
+                    ringColor = "#ef4444"; // Red for critical risk
                     
                     // Show notification badge on chat floating trigger
                     if (chatNotificationBadge) {
@@ -532,6 +534,7 @@ if (predictionForm) {
                 } else if (result.risk_probability >= 30) {
                     badgeText = "MEDIUM RISK";
                     badgeClasses = ["bg-amber-500/10", "text-amber-400", "border-amber-500/30"];
+                    ringColor = "#f59e0b"; // Orange/Amber for medium risk
                     
                     if (payload.Attendance_Rate < 75) {
                         recommendationText = "Attendance deficit detected. Schedule an informal review session to identify transportation or family complications.";
@@ -550,6 +553,7 @@ if (predictionForm) {
                 resultRiskBadge.innerText = badgeText;
                 badgeClasses.forEach(c => resultRiskBadge.classList.add(c));
                 resultRecommendation.innerText = recommendationText;
+                resultProgressRing.style.stroke = ringColor;
 
                 // Transition states
                 resultsLoading.classList.add('hidden');
