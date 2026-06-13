@@ -290,6 +290,23 @@ def predict():
             'message': f'Server prediction error: {str(e)}'
         }), 500
 
+# --- SIMULATED COUNSELOR FALLBACK ---
+def get_simulated_response(message, student_context):
+    message_lower = message.lower()
+    name = student_context.get('name', 'the student') if student_context else 'the student'
+    gpa = float(student_context.get('GPA', 3.0)) if student_context and student_context.get('GPA') else 3.0
+    attendance = float(student_context.get('Attendance_Rate', 85)) if student_context and student_context.get('Attendance_Rate') else 85
+    stress = int(student_context.get('Stress_Index', 5)) if student_context and student_context.get('Stress_Index') else 5
+    
+    if "stress" in message_lower or "burnout" in message_lower or stress > 7:
+        return f"I understand that academic stress can feel overwhelming. For {name}, who currently reports a stress index of {stress}/10, I highly recommend scheduling regular short breaks during study sessions, practicing mindfulness or deep breathing exercises, and connecting with our student mental health counselor. Remember to prioritize sleep and self-care alongside studies!"
+    elif "gpa" in message_lower or "grade" in message_lower or "study" in message_lower or gpa < 2.5:
+        return f"Regarding academic support: {name}'s GPA is currently {gpa}. Let's focus on setting up a weekly study planner, dividing large tasks into smaller daily goals, and arranging peer tutoring sessions for challenging subjects. Consistent small efforts will lead to major improvements!"
+    elif "attendance" in message_lower or "class" in message_lower or attendance < 75:
+        return f"Attendance is crucial for academic continuity. {name}'s attendance rate is currently {attendance}%. I recommend checking in to see if travel times or family circumstances are causing delays. Setting daily morning reminders and coordinating with lecturers for recorded sessions can help get back on track."
+    else:
+        return f"Hello! I am here to help support {name}'s retention and success. Based on their current metrics (GPA: {gpa}, Attendance: {attendance}%, Stress Level: {stress}/10), they are in a relatively stable position. Let's maintain standard academic observation and check back if any new challenges arise."
+
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
@@ -307,10 +324,11 @@ def chat():
         # Gemini configuration
         gemini_api_key = os.environ.get("GEMINI_API_KEY", "")
         if not gemini_api_key:
+            simulated = get_simulated_response(user_message, student_context)
             return jsonify({
-                'status': 'error',
-                'message': 'Gemini API key is not configured on the server.'
-            }), 500
+                'status': 'success',
+                'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(No Gemini API Key configured)*:\n\n{simulated}"
+            })
 
         gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_api_key}"
 
@@ -381,13 +399,16 @@ def chat():
         if resp.status_code != 200:
             print("Gemini API call failed with status:", resp.status_code)
             print("Response:", resp.text)
-            err_msg = 'Failed to fetch counseling response from Gemini API.'
+            simulated = get_simulated_response(user_message, student_context)
             if resp.status_code == 400 and ("API_KEY_INVALID" in resp.text or "API key not valid" in resp.text):
-                err_msg = 'Invalid Gemini API Key. Please configure a valid GEMINI_API_KEY (starting with AIzaSy) in your environment variables or .env file.'
+                return jsonify({
+                    'status': 'success',
+                    'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(Invalid Gemini API Key configured)*:\n\n{simulated}"
+                })
             return jsonify({
-                'status': 'error',
-                'message': err_msg
-            }), 500
+                'status': 'success',
+                'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(Gemini API Error: {resp.status_code})*:\n\n{simulated}"
+            })
 
         resp_data = resp.json()
         
@@ -396,10 +417,11 @@ def chat():
         except (KeyError, IndexError) as parse_err:
             print("Error parsing Gemini API response format:", parse_err)
             print("Response raw:", resp_data)
+            simulated = get_simulated_response(user_message, student_context)
             return jsonify({
-                'status': 'error',
-                'message': 'Error parsing counselor response format.'
-            }), 500
+                'status': 'success',
+                'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(Error parsing response)*:\n\n{simulated}"
+            })
 
         return jsonify({
             'status': 'success',
@@ -409,10 +431,17 @@ def chat():
     except Exception as e:
         print("Error in /chat:")
         traceback.print_exc()
-        return jsonify({
-            'status': 'error',
-            'message': f'Server chat error: {str(e)}'
-        }), 500
+        try:
+            simulated = get_simulated_response(user_message, student_context)
+            return jsonify({
+                'status': 'success',
+                'response': f"💡 **[Demo Mode] Simulated Counselor Response** *(Server Error: {str(e)})*:\n\n{simulated}"
+            })
+        except Exception:
+            return jsonify({
+                'status': 'error',
+                'message': f'Server chat error: {str(e)}'
+            }), 500
 
 if __name__ == '__main__':
     # Start flask app

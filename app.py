@@ -261,6 +261,23 @@ def send_otp_email(target_email):
         passkey_len = len(passkey) if passkey else 0
         return False, f"{str(e)} (Attempted login email: {login_email}, Passkey length: {passkey_len})"
  
+# --- SIMULATED COUNSELOR FALLBACK ---
+def get_simulated_response(message, student_context):
+    message_lower = message.lower()
+    name = student_context.get('name', 'the student') if student_context else 'the student'
+    gpa = student_context.get('GPA', 3.0) if student_context else 3.0
+    attendance = student_context.get('Attendance_Rate', 85) if student_context else 85
+    stress = student_context.get('Stress_Index', 5) if student_context else 5
+    
+    if "stress" in message_lower or "burnout" in message_lower or stress > 7:
+        return f"I understand that academic stress can feel overwhelming. For {name}, who currently reports a stress index of {stress}/10, I highly recommend scheduling regular short breaks during study sessions, practicing mindfulness or deep breathing exercises, and connecting with our student mental health counselor. Remember to prioritize sleep and self-care alongside studies!"
+    elif "gpa" in message_lower or "grade" in message_lower or "study" in message_lower or gpa < 2.5:
+        return f"Regarding academic support: {name}'s GPA is currently {gpa}. Let's focus on setting up a weekly study planner, dividing large tasks into smaller daily goals, and arranging peer tutoring sessions for challenging subjects. Consistent small efforts will lead to major improvements!"
+    elif "attendance" in message_lower or "class" in message_lower or attendance < 75:
+        return f"Attendance is crucial for academic continuity. {name}'s attendance rate is currently {attendance}%. I recommend checking in to see if travel times or family circumstances are causing delays. Setting daily morning reminders and coordinating with lecturers for recorded sessions can help get back on track."
+    else:
+        return f"Hello! I am here to help support {name}'s retention and success. Based on their current metrics (GPA: {gpa}, Attendance: {attendance}%, Stress Level: {stress}/10), they are in a relatively stable position. Let's maintain standard academic observation and check back if any new challenges arise."
+
 # --- GEMINI CHAT CONNECTOR ---
 def get_gemini_response(message, history, student_context):
     api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("gemini_api_key")
@@ -275,7 +292,8 @@ def get_gemini_response(message, history, student_context):
             pass
             
     if not api_key:
-        return "⚠️ Gemini API Key is not configured on the server. Please add it to your `.env` or Streamlit Cloud Secrets."
+        simulated = get_simulated_response(message, student_context)
+        return f"💡 **[Demo Mode] Simulated Counselor Response** *(No Gemini API Key configured)*:\n\n{simulated}"
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     
@@ -334,11 +352,14 @@ def get_gemini_response(message, history, student_context):
         if resp.status_code == 200:
             return resp.json()['candidates'][0]['content']['parts'][0]['text']
         else:
+            simulated = get_simulated_response(message, student_context)
             if resp.status_code == 400 and ("API_KEY_INVALID" in resp.text or "API key not valid" in resp.text):
-                return "⚠️ **Invalid Gemini API Key**. Please ensure you have set a valid `GEMINI_API_KEY` (starting with `AIzaSy`) in your `.env` file or Streamlit Cloud Secrets."
-            return f"Error from Gemini API: {resp.status_code} - {resp.text}"
+                return f"💡 **[Demo Mode] Simulated Counselor Response** *(Invalid Gemini API Key configured)*:\n\n{simulated}"
+            return f"💡 **[Demo Mode] Simulated Counselor Response** *(Gemini API Error: {resp.status_code})*:\n\n{simulated}"
     except Exception as e:
-        return f"Connection Error: {str(e)}"
+        simulated = get_simulated_response(message, student_context)
+        return f"💡 **[Demo Mode] Simulated Counselor Response** *(Connection Error: {str(e)})*:\n\n{simulated}"
+
 
 # --- MAIN RENDER ROUTINE ---
 if not st.session_state.authenticated:
